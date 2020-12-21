@@ -29,6 +29,7 @@ include("static/header.php");
           </div>
         </div>
         <div class="col-12">
+        
           <table class="table table-striped table-hover">
             <tr>
               <th>#ID</th>
@@ -49,7 +50,7 @@ include("static/header.php");
               <td><?= $korisnik["JMBG"] ?></td>
               <td>
                 <a class="btn btn-danger" href="index.php?akcija=pobrisi&id=<?= $korisnik["ID"] ?>"><i class="fas fa-trash"></i></a>
-                <a class="btn btn-info" href="index.php?akcija=pobrisi&id=<?= $korisnik["ID"] ?>" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="Uređivanje"><i class="fas fa-edit"></i></a>
+                <button class="btn btn-info" id="<?= $korisnik["ID"] ?>" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="Uređivanje"><i class="fas fa-edit"></i></button>
               </td>
             </tr>
             <?php endforeach ?>
@@ -99,9 +100,18 @@ include("static/header.php");
                     <label>Uloga korisnika:</label>
                     <select required class="form-control" id="ulogaKorisnika">
                       <option value="nastavnik">Nastavnik</option>
-                      <option value="učenik">Učenik</option>
-                      <option value="administrator">admin</option>
+                      <option value="učenik">Ucenik</option>
+                      <option value="administrator">Administrator</option>
                     </select>
+                </div> 
+                
+                <br />
+
+                <div id="alert" class="alert alert-success" style="display: none;" role="alert">
+                  Korisnik uspješno dodan!
+                </div>
+                <div id="alert-fail" class="alert alert-danger" style="display: none;" role="alert">
+                  Dogodila se greška!
                 </div>
             </form>
         </div>
@@ -128,44 +138,104 @@ include("static/header.php");
     var modalTitle = exampleModal.querySelector('.modal-title')
     var modalBodyInput = exampleModal.querySelector('.modal-body input')
 
-    modalTitle.textContent = 'New message to ' + recipient
+    modalTitle.textContent = recipient + ' korisnika';
     modalBodyInput.value = recipient
 
+    var saveFormButton = document.getElementById('save')
+    //Counter -> quick fix
+    var counter = 0;
     
-  });
+    if(recipient === "Dodavanje"){
+      saveFormButton.addEventListener('click', addNewUser);
+    }else{
 
-  var saveFormButton = document.getElementById('save')
-  saveFormButton.addEventListener('click', saveFormData);
+      console.log(button.id)
 
-  function saveFormData(e){
-      e.preventDefault();
+      var userid = button.id;
 
-      console.log("Activated!!!");
+      saveFormButton.addEventListener('click', editUser);
 
-
-      var ime = document.getElementById('imeKorisnika').value;
-      var prezime = document.getElementById('prezimeKorisnika').value;
-      var jmbg = document.getElementById('jmbgKorisnika').value;
-      var email = document.getElementById('emailKorisnika').value;
-      var lozinka = document.getElementById('lozinkaKorisnika').value;
-      var uloga = document.getElementById('ulogaKorisnika').value;
-
-      var param = "imeKorisnika=" + ime + "&prezimeKorisnika=" + prezime + "&jmbgKorisnika=" + jmbg + "&emailKorisnika=" + email + "&lozinkaKorisnika=" + lozinka + "&ulogaKorisnika=" + uloga;
-      console.log(param);
+      var param = "id=" + userid;
 
       var xhr =new XMLHttpRequest();
 
-      xhr.open('POST', 'users/add.php', true);
+      xhr.open('POST', 'users/get_user.php', true);
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
       xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200){
-          console.log(this.responseText);
+          console.log(JSON.parse(this.responseText));
+
+          var response = JSON.parse(this.responseText);
+
+          document.getElementById('imeKorisnika').value = response.ime;
+          document.getElementById('prezimeKorisnika').value = response.prezime;
+          document.getElementById('jmbgKorisnika').value = response.JMBG;
+          document.getElementById('emailKorisnika').value = response.email;
+          document.getElementById('lozinkaKorisnika').value = response.lozinka;
+          if(response.uloga == "Administrator"){
+            document.getElementById('ulogaKorisnika').selectedIndex = "2";
+          }else if(response.uloga == "Ucenik"){
+            document.getElementById('ulogaKorisnika').selectedIndex = "1";
+          }else{
+            document.getElementById('ulogaKorisnika').selectedIndex = "0";
+          }
       }
     }
 
       xhr.send(param);
+
     }
+
+
+  });
+
+    function addNewUser(e){
+        e.preventDefault();
+
+        //console.log("Activated!!!");
+
+
+        var ime = document.getElementById('imeKorisnika').value;
+        var prezime = document.getElementById('prezimeKorisnika').value;
+        var jmbg = document.getElementById('jmbgKorisnika').value;
+        var email = document.getElementById('emailKorisnika').value;
+        var lozinka = document.getElementById('lozinkaKorisnika').value;
+        var uloga = document.getElementById('ulogaKorisnika').value;
+
+        var param = "imeKorisnika=" + ime + "&prezimeKorisnika=" + prezime + "&jmbgKorisnika=" + jmbg + "&emailKorisnika=" + email + "&lozinkaKorisnika=" + lozinka + "&ulogaKorisnika=" + uloga;
+        //console.log(param);
+
+        var xhr =new XMLHttpRequest();
+
+        xhr.open('POST', 'users/add.php', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200){
+            console.log(JSON.parse(this.responseText));
+            if(JSON.parse(this.responseText).result == true){
+              console.log("reload")
+
+              document.getElementById('alert-fail').style.display = "none";
+              document.getElementById('alert').style.display = "block";
+              
+              window.setTimeout(function alert(){
+                location.reload();
+              }, 2000);
+            }else{
+              document.getElementById('alert-fail').style.display = "block";
+            }
+        }
+      }
+
+        xhr.send(param);
+      }
+
+      function editUser(){
+        console.log("EditUser button!");
+
+      }
 
 </script>
 

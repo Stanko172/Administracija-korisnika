@@ -5,6 +5,6 @@
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         })
-    </script>   
+    </script>
   </body>
 </html>

@@ -16,6 +16,19 @@ class Korisnik {
         return false;
     }
 
+    public static function dodaj ($korisnik){
+        global $konekcija;
+        $ime = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["imeKorisnika"]));
+        $prezime = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["prezimeKorisnika"]));
+        $JMBG = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["jmbgKorisnika"]));
+        $email = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["emailKorisnika"]));
+        $lozinka = md5($korisnik["lozinkaKorisnika"]);
+        $uloga = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["ulogaKorisnika"]));
+
+        $upit = "INSERT INTO `korisnik`(`ime`, `prezime`, `JMBG`, `email`, `lozinka`, `uloga`) VALUES ('$ime', '$prezime', '$JMBG', '$email', '$lozinka', '$uloga')";
+        return mysqli_query($konekcija, $upit);
+    }
+
     public static function spasi ($korisnik){
         global $konekcija;
         $ime = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["imeKorisnika"]));
