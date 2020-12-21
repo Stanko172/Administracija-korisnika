@@ -90,12 +90,7 @@ include("static/header.php");
                     <label>E-mail adresa korisnika:</label>
                     <input type="email" required class="form-control" id="emailKorisnika" placeholder="Unesite Vašu email adresu" />
                 </div> <br />
-
-                <div class="form-group">
-                    <label>Lozinka korisnika:</label>
-                    <input type="password" class="form-control" id="lozinkaKorisnika" placeholder="Unesite Vašu lozinku" />
-                </div> <br />
-
+                
                 <div class="form-group">
                     <label>Uloga korisnika:</label>
                     <select required class="form-control" id="ulogaKorisnika">
@@ -103,9 +98,12 @@ include("static/header.php");
                       <option value="učenik">Ucenik</option>
                       <option value="administrator">Administrator</option>
                     </select>
-                </div> 
-                
-                <br />
+                </div> <br />
+
+                <div class="form-group" id="password-group">
+                    <label>Lozinka korisnika:</label>
+                    <input type="password" class="form-control" id="lozinkaKorisnika" placeholder="Unesite Vašu lozinku" />
+                </div> <br />
 
                 <div id="alert" class="alert alert-success" style="display: none;" role="alert">
                   Korisnik uspješno dodan!
@@ -125,6 +123,7 @@ include("static/header.php");
 
 <script>
   var exampleModal = document.getElementById('exampleModal')
+  var userid;
 
   exampleModal.addEventListener('show.bs.modal', function (event) {
     // Button that triggered the modal
@@ -146,12 +145,14 @@ include("static/header.php");
     var counter = 0;
     
     if(recipient === "Dodavanje"){
+      document.getElementById('password-group').style.display = "block";
+      
       saveFormButton.addEventListener('click', addNewUser);
     }else{
 
       console.log(button.id)
 
-      var userid = button.id;
+      userid = button.id;
 
       saveFormButton.addEventListener('click', editUser);
 
@@ -172,7 +173,7 @@ include("static/header.php");
           document.getElementById('prezimeKorisnika').value = response.prezime;
           document.getElementById('jmbgKorisnika').value = response.JMBG;
           document.getElementById('emailKorisnika').value = response.email;
-          document.getElementById('lozinkaKorisnika').value = response.lozinka;
+          document.getElementById('password-group').style.display = "none";
           if(response.uloga == "Administrator"){
             document.getElementById('ulogaKorisnika').selectedIndex = "2";
           }else if(response.uloga == "Ucenik"){
@@ -194,7 +195,6 @@ include("static/header.php");
         e.preventDefault();
 
         //console.log("Activated!!!");
-
 
         var ime = document.getElementById('imeKorisnika').value;
         var prezime = document.getElementById('prezimeKorisnika').value;
@@ -232,8 +232,50 @@ include("static/header.php");
         xhr.send(param);
       }
 
-      function editUser(){
+      function editUser(e){
         console.log("EditUser button!");
+        console.log(userid);
+
+        e.preventDefault();
+
+        //console.log("Activated!!!");
+
+
+        var ime = document.getElementById('imeKorisnika').value;
+        var prezime = document.getElementById('prezimeKorisnika').value;
+        var jmbg = document.getElementById('jmbgKorisnika').value;
+        var email = document.getElementById('emailKorisnika').value;
+        var lozinka = document.getElementById('lozinkaKorisnika').value;
+        var uloga = document.getElementById('ulogaKorisnika').value;
+
+        var param = "imeKorisnika=" + ime + "&prezimeKorisnika=" + prezime + "&jmbgKorisnika=" + jmbg + "&emailKorisnika=" + email + "&lozinkaKorisnika=" + lozinka + "&ulogaKorisnika=" + uloga + "&idKorisnika=" + userid;
+        console.log(param);
+
+        var xhr =new XMLHttpRequest();
+
+        xhr.open('POST', 'users/edit.php', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200){
+            console.log(this.responseText);
+            if(JSON.parse(this.responseText) == true){
+              console.log("reload")
+
+              document.getElementById('alert').textContent = "Uspješno ažuriran korisnik!";
+              document.getElementById('alert-fail').style.display = "none";
+              document.getElementById('alert').style.display = "block";
+              
+              window.setTimeout(function alert(){
+                location.reload();
+              }, 2000);
+            }else{
+              document.getElementById('alert-fail').style.display = "block";
+            }
+        }
+        }
+
+        xhr.send(param);
 
       }
 

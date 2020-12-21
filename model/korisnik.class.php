@@ -35,10 +35,10 @@ class Korisnik {
         $prezime = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["prezimeKorisnika"]));
         $JMBG = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["jmbgKorisnika"]));
         $email = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["emailKorisnika"]));
-        $lozinka = md5($korisnik["lozinkaKorisnika"]);
+        //$lozinka = md5($korisnik["lozinkaKorisnika"]);
         $uloga = htmlspecialchars(mysqli_real_escape_string($konekcija, $korisnik["ulogaKorisnika"]));
 
-        $upit = "INSERT INTO `korisnik`(`ime`, `prezime`, `JMBG`, `email`, `lozinka`, `uloga`) VALUES ('$ime', '$prezime', '$JMBG', '$email', '$lozinka', '$uloga')";
+        $upit = "UPDATE korisnik SET ime='".$ime."', prezime='".$prezime."', JMBG='".$JMBG."', email='".$email."', uloga='".$uloga."' WHERE id=".$korisnik["idKorisnika"].";";
         return mysqli_query($konekcija, $upit);
     }
 
